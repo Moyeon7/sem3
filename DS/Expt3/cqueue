@@ -1,0 +1,220 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+int input();
+void enqueue(int item);
+int isFull();
+void run();
+int isEmpty();
+void display_Q();
+void display_D(int n);
+void scheduling();
+
+#define MAX 5
+
+int cqueue_arr[MAX];
+int front=-1;
+int rear=-1;
+
+struct Task{
+    int TaskId;
+    char TaskTitle;  
+    int TaskDuration;
+    char Status;
+}t[100];
+
+int main(){
+    int n;
+    n=input();
+    int choice, item;
+
+    while(1){
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        printf("1) Schedule\n");
+        printf("2) Run\n");
+        printf("3) Display the queue\n");
+        printf("4) Display the Task details\n");
+        printf("5) Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch(choice){
+            case 1: printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+                    scheduling();
+                    break;
+            case 2: printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+                    run();
+                    break;
+            case 3: printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+                    display_Q();
+                    break;
+            case 4: printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+                    display_D(n);
+                    break;
+            case 5: return 1;
+        }
+    }
+
+    return 0;
+}
+
+void scheduling(){
+    int id, check=0;
+    printf("Enter the Task Id: ");
+    scanf("%d", &id);
+    for(int i=0; i<5; i++){
+        if(id==t[i].TaskId){
+            if(t[i].Status=='q'){
+                printf("\nThe task is already queued.\n");
+                break;
+            }else if(t[i].Status=='c'){
+                printf("\nThe task is already completed.\n");
+                break;
+            }else{
+                getchar();
+                if(isFull()){
+                    printf("\nQueue is full wait for some time.\n");
+                    break;
+                }else{
+                    enqueue(t[i].TaskId);
+                    t[i].Status='q';
+                    printf("\nThe task is queued\n");
+                    break;  
+                }
+            }
+        }
+    }
+}
+
+void enqueue(int item){
+    if(isFull()){
+        printf("Queue is full wait for some time.\n");
+        return;
+    }
+    if(front==-1){
+        front=0;
+    }
+
+    rear=(rear+1)%MAX;
+    cqueue_arr[rear]=item;
+}
+
+void run(){
+    if(isEmpty()){
+        printf("Queue is empty.\n");
+        return;
+    }
+    int item=cqueue_arr[front];
+    int i, seconds;
+    
+    for(i=0; i<4; i++){
+        if(item==t[i].TaskId){
+            if(t[i].Status=='c'){
+                seconds=t[i].TaskDuration;
+                printf("\nTask %d was already completed within %d seconds\n", item, seconds);
+                if(front==rear)
+                    front=rear=-1;
+                else
+                    front=(front+1)%MAX;
+                return;
+            }else{
+                printf("Tasking Running............\n");
+
+                sleep(t[i].TaskDuration);
+                seconds=t[i].TaskDuration;
+                t[i].Status='c';
+                
+                printf("~~~~~Completed~~~~~\n");
+                
+                printf("\nTask %d was completed within %d seconds\n", item, seconds);
+                if(front==rear)
+                    front=rear=-1;
+                else
+                    front=(front+1)%MAX;
+                return;
+            }
+        }
+    }
+
+}
+
+void display_Q(){
+    int i;
+    if(isEmpty()){
+        printf("Queue is empty\n");
+        return;
+    }
+
+    printf("Cicular Queue contents:\n");
+    i=front;
+    if(front<=rear){
+        while(i<=rear)
+            printf("%d \n", cqueue_arr[i++]);
+    }else{
+        while(i<=MAX-1)
+            printf("%d \n", cqueue_arr[i++]);
+        i=0;
+        while(i<=rear)
+            printf("%d \n", cqueue_arr[i++]);
+    }
+    printf("\n");
+}
+
+void display_D(int n){
+    for(int i=0; i<n; i++){
+        printf("Task %d\n", i+1);
+        printf("Task Id: %d\n", t[i].TaskId);
+
+        printf("Task Title (a-assignment, h-homework, p-project, c-classwork): %c\n", t[i].TaskTitle);
+
+        printf("Task Duration: %d\n", t[i].TaskDuration);
+
+        printf("Task Status u-unscheduled, q-queued, c-complete: %c\n\n", t[i].Status);
+    }
+    return;
+}
+
+int isFull(){
+    if((front==rear+1) || (front==0 && rear==MAX-1))
+        return 1;
+    else
+        return 0;
+}
+
+int isEmpty(){
+    if(front==-1)
+        return 1;
+    else
+        return 0;
+}
+
+int input(){
+    int n;
+    printf("Enter the number of inputs: ");
+    scanf("%d", &n);
+    getchar();
+    for(int i=0; i<n; i++){
+        printf("\n");
+        printf("Enter the Task Id: ");
+        scanf("%d", &t[i].TaskId);
+
+        getchar();
+        printf("Enter the Task Title (a-assignment, h-homework, p-project, c-classwork): ");
+        scanf(" %c", &t[i].TaskTitle);
+
+        getchar();
+        printf("Enter the Task Duration: ");
+        scanf("%d", &t[i].TaskDuration);
+
+        getchar();
+        printf("Enter the Task Status (u-unscheduled, q-queued, c-complete): ");
+        scanf(" %c", &t[i].Status);
+
+        if(t[i].Status == 'q' || t[i].Status == 'c'){
+            enqueue(t[i].TaskId);
+        }
+        
+    }
+    return n;
+}
