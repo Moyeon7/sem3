@@ -1,0 +1,4 @@
+expt 11
+1)implement ls and bs using employee structure
+2)implement hashing using the foll collision resolution technique: linear probing, quadratic prob, double hashing
+3)implement hasing using separate chaining
